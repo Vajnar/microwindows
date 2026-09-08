@@ -16,6 +16,9 @@ static int fb = -1;
 
 static PSD fb_open(PSD psd);
 static void fb_close(PSD psd);
+#ifdef FBIO_UPDATE
+static void fb_update(PSD psd, MWCOORD x, MWCOORD y, MWCOORD width, MWCOORD height);
+#endif
 
 SCREENDEVICE scrdev = {
   0, 0, 0, 0, 0, 0, 0, NULL, 0, NULL, 0, 0, 0, 0, 0, 0,
@@ -28,7 +31,11 @@ SCREENDEVICE scrdev = {
   gen_mapmemgc,
   gen_freememgc,
   gen_setportrait,
+#ifdef FBIO_UPDATE
+  fb_update,
+#else
   NULL,
+#endif
   NULL
 };
 
@@ -107,3 +114,13 @@ static void fb_close(PSD psd)
       fb = -1;
     }
 }
+
+#ifdef FBIO_UPDATE
+
+static void fb_update(PSD psd, MWCOORD x, MWCOORD y, MWCOORD width, MWCOORD height)
+{
+  struct fb_area_s area = {x, y, width, height};
+  ioctl(fb, FBIO_UPDATE, &area);
+}
+
+#endif
